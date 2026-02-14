@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> MANGAS HUB </title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon: #00f3ff;
+            --accent: #ff00c1;
+            --dark: #080808;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: var(--dark); color: white;
+            font-family: 'Segoe UI', sans-serif; overflow: hidden;
+        }
+
+        .stars {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0));
+            background-size: 100px 100px; z-index: -1; opacity: 0.4;
+        }
+
+        #login-screen { 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; background: var(--dark);
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card {
+            background: rgba(10, 10, 10, 0.95);
+            padding: 35px; border-radius: 20px;
+            border: 2px solid var(--neon);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            text-align: center; width: 320px;
+            animation: neonPulse 2s infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            from { box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); }
+            to { box-shadow: 0 0 40px rgba(0, 243, 255, 0.5); border-color: #fff; }
+        }
+
+        .input-group { margin-bottom: 25px; }
+
+        input {
+            width: 90%; padding: 12px; background: #111; color: var(--neon); 
+            font-family: 'Orbitron'; border: none; border-bottom: 2px solid var(--neon);
+            text-align: center; outline: none; font-size: 1.2rem;
+        }
+
+        .pass-label {
+            display: block; color: var(--neon); font-family: 'Orbitron';
+            font-size: 0.7rem; margin-top: 8px; letter-spacing: 3px;
+            text-transform: uppercase; opacity: 0.7;
+        }
+
+        /* NAVBAR CON SCROLL ORIGINAL */
+        .navbar {
+            display: flex; align-items: center; padding: 10px;
+            background: rgba(0,0,0,0.95); border-bottom: 2px solid var(--neon);
+            overflow-x: auto; white-space: nowrap; gap: 8px;
+            scrollbar-width: none;
+        }
+        .navbar::-webkit-scrollbar { display: none; }
+
+        .search-container {
+            display: flex; align-items: center; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--neon); border-radius: 50px;
+            padding: 5px 15px; margin: 0 15px; min-width: 250px; flex-grow: 2;
+        }
+
+        .search-container input {
+            background: transparent; border: none; color: white;
+            font-family: 'Segoe UI'; font-size: 14px; width: 100%;
+            text-align: left; padding: 5px; outline: none;
+        }
+
+        /* CONTADOR DENTRO DE LA NAVBAR */
+        .nav-counter {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 0 10px;
+        }
+        .nav-counter span { font-size: 7px; color: var(--accent); font-family: 'Orbitron'; margin-bottom: 2px; }
+        .nav-counter img { filter: hue-rotate(180deg) brightness(1.5); height: 18px; }
+
+        .btn-row { display: flex; justify-content: center; gap: 10px; }
+
+        .nav-btn {
+            background: transparent; color: white; border: 1px solid var(--neon);
+            padding: 10px 15px; border-radius: 50px; cursor: pointer;
+            font-family: 'Orbitron'; font-size: 10px; transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+        .paste-btn { border-color: var(--accent); color: var(--accent); }
+        .btn-magic { background: var(--accent); border-color: var(--accent); }
+
+        #main-content { display: none; flex-direction: column; height: 100vh; }
+        .layout-body { flex-grow: 1; display: flex; background: #000; height: calc(100vh - 65px); }
+        #manga-viewport { width: 100%; height: 100%; border: none; }
+        #loading-text { display: none; color: var(--neon); font-family: 'Orbitron'; margin-top: 15px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div class="stars"></div>
+
+    <div id="login-screen">
+        <div class="login-card">
+            <h1 style="font-family: 'Orbitron'; color: var(--neon); font-size: 1.4rem; margin-top: 0; margin-bottom: 25px;"> GAEL XIT V1 </h1>
+            
+            <div class="input-group">
+                <input type="password" id="pass-input" placeholder="••••">
+                <span class="pass-label">password</span>
+            </div>
+
+            <div class="btn-row">
+                <button id="entry-btn" class="nav-btn" onclick="checkPass()">ENTRAR</button>
+                <button type="button" class="nav-btn paste-btn" onclick="autoFill()">PEGAR</button>
+            </div>
+            
+            <div id="loading-text">ACCEDIENDO AL SISTEMA...</div>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="navbar">
+            <button class="nav-btn" onclick="loadManga('https://www.novelcool.com/category/Manga_2.html')">NovelCool</button>
+            <button class="nav-btn" onclick="loadManga('https://tumanga.org/')">TuManga</button>
+            <button class="nav-btn" onclick="loadManga('https://www.mangago.me/')">MangaGo</button>
+            <button class="nav-btn" onclick="loadManga('https://mangafire.to/')">MangaFire</button>
+            
+            <div class="search-container">
+                <input type="text" id="url-search" placeholder="Google o URL..." onkeypress="if(event.key === 'Enter') smartSearch()">
+                <span style="cursor:pointer" onclick="smartSearch()">🔍</span>
+            </div>
+
+            <div class="nav-counter">
+                <span>VISITORS</span>
+                <img src="https://hitwebcounter.com/counter/counter.php?page=gaelxit_final&style=0006&nbdigits=5&type=page&initCount=0" border="0" />
+            </div>
+
+            <button class="nav-btn btn-magic" onclick="changeColor()">COLOR</button>
+        </div>
+
+        <div class="layout-body">
+            <iframe id="manga-viewport" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        function autoFill() {
+            document.getElementById('pass-input').value = "2026";
+        }
+
+        function checkPass() {
+            const input = document.getElementById('pass-input').value;
+            if (input === "2026") {
+                document.querySelector('.btn-row').style.display = 'none';
+                document.getElementById('loading-text').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'flex';
+                    loadManga('https://www.novelcool.com/category/Manga_2.html');
+                }, 1500);
+            } else { alert("PASS INCORRECTA"); }
+        }
+
+        function loadManga(url) {
+            document.getElementById('manga-viewport').src = url;
+        }
+
+        function smartSearch() {
+            let inputElement = document.getElementById('url-search');
+            let query = inputElement.value;
+            if (!query) return;
+            let targetUrl = (query.startsWith('http')) ? query : "https://www.google.com/search?igu=1&q=" + encodeURIComponent(query);
+            loadManga(targetUrl);
+            inputElement.value = ""; 
+            inputElement.blur();
+        }
+
+        function changeColor() {
+            const colors = ['#00f3ff', '#ff00c1', '#00ff41', '#ffff00', '#ff4500', '#9400d3'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.documentElement.style.setProperty('--neon', randomColor);
+        }
+    </script>
+</body>
+</html>
